@@ -3,11 +3,12 @@
 #include <SPI.h>
 
 #define CS 10
-#define CURRENT_READ A0
+#define CURR_READ A0
+#define DIST_READ A1
 
 File logger;
-int run = 1;
-char name[100] = "Data_run_1";
+double current_reading;
+int distance_reading, run = 1;
 
 void setup()
 {
@@ -22,24 +23,37 @@ void setup()
     }
     Serial.println("initialization done.");
 
-    // Check for existing files, and change file name
-	while(SD.exists(name)){
-        sprintf(name, "Data_run_%d", ++run);
-    }
-    logger = SD.open(name, FILE_WRITE);
-
+    File dataFile = SD.open("datalog.csv", FILE_WRITE);
+    dataFile.println("\n\ncurrent, distance\n");
+    dataFile.close();
 }
 
 void loop()
 {
+    // make a string for assembling the data to log:
+    String dataString = "";
+    // read three sensors and append to the string:
 
-    // read current sensor
-    int current_reading = analogRead(CURRENT_READ);
+    current_reading = (0.0256 * analogRead(CURR_READ)) - 2.5447;
+    dataString += String(current_reading);
 
-    // Build the data string
-    String data = String(current_reading) /* + "," + other_data */;
+#ifdef DIST_READ
+    distance_reading = analogRead(DIST_READ);
+    dataString += String(",");
+    dataString += String(distance_reading);
+#endif
 
-    // Print the data to the file
-    logger.println(data);
+    // open the file. note that only one file can be open at a time,
+    // so you have to close this one before opening another.
+    File dataFile = SD.open("datalog.csv", FILE_WRITE);
+
+    // if the file is available, write to it:
+    if (dataFile) {
+        dataFile.println(dataString);
+        dataFile.close();
+        // print to the serial port too:
+        Serial.println(dataString);
+    } else { // if the file isn&apos;t open, pop up an error:
+        Serial.println("error opening file");
+    }
 }
-
