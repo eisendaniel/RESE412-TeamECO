@@ -24,7 +24,7 @@ void setup()
     Serial.println("initialization done.");
 
     File dataFile = SD.open("datalog.csv", FILE_WRITE);
-    dataFile.println("\n\ncurrent, distance\n");
+    dataFile.println("\n\nhall, current, distance\n");
     dataFile.close();
 }
 
@@ -34,8 +34,11 @@ void loop()
     String dataString = "";
     // read three sensors and append to the string:
 
-    current_reading = (0.0256 * analogRead(CURR_READ)) - 2.5447;
+    current_reading = analogRead(CURR_READ);
+    
     dataString += String(current_reading);
+    dataString += String(",");
+    dataString += String((0.0256 * current_reading) - 2.5447);
 
 #ifdef DIST_READ
     distance_reading = analogRead(DIST_READ);
