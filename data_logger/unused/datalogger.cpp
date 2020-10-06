@@ -4,7 +4,7 @@
 
 #define CS 10
 #define CURR_READ A0
-// #define DIST_READ A1
+#define DIST_READ A1
 
 File logger;
 double current_reading;
@@ -24,7 +24,7 @@ void setup()
     Serial.println("initialization done.");
 
     File dataFile = SD.open("datalog.csv", FILE_WRITE);
-    dataFile.println("\n\ntime, hall, current\n");
+    dataFile.println("\n\nhall, current, distance\n");
     dataFile.close();
 }
 
@@ -35,8 +35,7 @@ void loop()
     // read three sensors and append to the string:
 
     current_reading = analogRead(CURR_READ);
-    dataString += String(millis());
-    dataString += String(",");
+    
     dataString += String(current_reading);
     dataString += String(",");
     dataString += String((0.0256 * current_reading) - 2.5447);
